@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   const internalUrl = process.env.INTERNAL_API_URL || 'http://api:4000';
   
