@@ -21,6 +21,11 @@ services:
     depends_on:
       - db
     environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - PORT=${API_PORT:-4000}
+      - POSTGRES_USER=${POSTGRES_USER:-user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-password}
+      - POSTGRES_DB=${POSTGRES_DB:-neqtra_payroll}
       - DATABASE_URL=postgresql://${POSTGRES_USER:-user}:${POSTGRES_PASSWORD:-password}@db:5432/${POSTGRES_DB:-neqtra_payroll}?schema=public
       - JWT_SECRET=${JWT_SECRET:-super_secret_jwt_key_neqtra}
     ports:
@@ -34,7 +39,9 @@ services:
     depends_on:
       - api
     environment:
-      - INTERNAL_API_URL=http://api:4000
+      - NODE_ENV=${NODE_ENV:-production}
+      - PORT=${WEB_PORT:-3000}
+      - INTERNAL_API_URL=${INTERNAL_API_URL:-http://api:4000}
     ports:
       - "3000:3000"
 
