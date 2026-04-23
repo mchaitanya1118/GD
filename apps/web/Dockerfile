@@ -6,10 +6,11 @@ RUN apk add --no-cache libc6-compat python3 make g++
 
 WORKDIR /app
 
-# Copy lockfile and package definitions first for better caching
+# Copy lockfile and ALL package definitions for workspace resolution
 COPY package.json package-lock.json ./
-COPY apps/web/package.json ./apps/web/
-COPY apps/api/package.json ./apps/api/
+COPY apps/ ./apps/
+COPY packages/ ./packages/
+RUN find apps packages -type f ! -name "package.json" -delete
 
 # Install dependencies (ensuring devDependencies are included despite environment settings)
 ENV NODE_ENV=development
@@ -18,10 +19,10 @@ RUN npm install --include=dev
 # Copy the rest of the source
 COPY . .
 
-# Build the Next.js app
+# Build the Next.js app with verbose error reporting
 WORKDIR /app
 ENV INTERNAL_API_URL=http://api:4000
-RUN npm run build -w apps/web || (cd apps/web && ls -la && npm list next && npm run build --verbose)
+RUN npm run build -w apps/web > build_output.log 2>&1 || (cat build_output.log && exit 1)
 
 # Production image
 FROM node:22-alpine AS runner
