@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { FileText, Calculator, CheckCircle2, Search, Users, Upload, Trash2, Loader2 } from 'lucide-react';
+import { FileText, Calculator, CheckCircle, Search, Users, Upload, Trash2, Loader2 } from 'lucide-react';
 import { toTitleCase } from '@/lib/format';
 import RiderPayslipView from './RiderPayslipView';
 import { formatCurrency } from '@/lib/format';
@@ -198,7 +198,7 @@ export default function PayrollPage() {
             {[
               { label: 'Total Payout', icon: Calculator, color: 'bg-emerald-500', value: formatCurrency(dashboardData?.summary?.totalPayout || 0) },
               { label: 'Active Riders', icon: Users, color: 'bg-blue-500', value: dashboardData?.summary?.totalRiders || 0 },
-              { label: 'Slips Finalized', icon: CheckCircle2, color: 'bg-amber-500', value: dashboardData?.summary?.completed || 0 },
+              { label: 'Slips Finalized', icon: CheckCircle, color: 'bg-amber-500', value: dashboardData?.summary?.completed || 0 },
               { label: 'Avg Payout', icon: FileText, color: 'bg-purple-500', value: formatCurrency((dashboardData?.summary?.totalPayout || 0) / (dashboardData?.summary?.totalRiders || 1)) },
             ].map((stat, i) => (
               <div key={i} className="flex items-center gap-4 bg-white/60 p-5 rounded-2xl border border-white transition-all hover:scale-[1.02] hover:shadow-xl shadow-slate-200/50 backdrop-blur-md">
