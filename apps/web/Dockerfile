@@ -17,6 +17,7 @@ COPY apps/web ./apps/web
 
 # Build the Next.js app
 WORKDIR /app/apps/web
+ENV INTERNAL_API_URL=http://api:4000
 RUN npm run build
 
 # Production image
