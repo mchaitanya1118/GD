@@ -30,7 +30,7 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/apps/api/dist ./dist
 COPY --from=builder /app/apps/api/package.json ./package.json
 COPY --from=builder /app/apps/api/prisma ./prisma
-COPY --from=builder /app/apps/api/.env ./ .env
+COPY --from=builder /app/apps/api/.env ./.env
 
 EXPOSE 4000
 
