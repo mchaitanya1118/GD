@@ -147,7 +147,7 @@ export default function RidersPage() {
             <Button 
                 variant="outline"
                 onClick={() => {
-                    const url = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/reports/riders/export`;
+                    const url = `/api/reports/riders/export`;
                     const token = localStorage.getItem('token');
                     fetch(url, {
                         headers: { 'Authorization': `Bearer ${token}` }

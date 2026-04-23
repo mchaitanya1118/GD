@@ -164,7 +164,7 @@ export default function PayrollPage() {
             <Button 
                 variant="outline"
                 onClick={() => {
-                  const url = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/reports/payroll/export?month=${month}&year=${year}`;
+                  const url = `/api/reports/payroll/export?month=${month}&year=${year}`;
                   const token = localStorage.getItem('token');
                   fetch(url, {
                     headers: { 'Authorization': `Bearer ${token}` }
