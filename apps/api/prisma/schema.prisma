@@ -1,0 +1,168 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  id        String     @id @default(cuid())
+  name      String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  auditLogs AuditLog[]
+  batches   Batch[]
+  payslips  Payslip[]
+  riders    Rider[]
+  users     User[]
+  rateConfigs RateConfig[]
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  role      UserRole @default(ACCOUNTANT)
+  tenantId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+}
+
+model Rider {
+  id           String       @id @default(cuid())
+  riderId      String
+  riderName    String
+  vehicleType  VehicleType
+  rateType     RateType     @default(TARGET)
+  tenantId     String
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  companyCode  String?
+  dailyEntries DailyEntry[]
+  payslips     Payslip[]
+  tenant       Tenant       @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, riderId])
+}
+
+model Batch {
+  id              String       @id @default(cuid())
+  batchNumber     Int
+  rateSingleOrder Float
+  rateDoubleOrder Float
+  tenantId        String
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  tenant          Tenant       @relation(fields: [tenantId], references: [id])
+  dailyEntries    DailyEntry[]
+
+  @@unique([tenantId, batchNumber])
+}
+
+model Payslip {
+  id                String           @id @default(cuid())
+  month             Int
+  year              Int
+  status            SalarySlipStatus @default(DRAFT)
+  riderId           String
+  tenantId          String
+  totalSingleOrders Int              @default(0)
+  totalDoubleOrders Int              @default(0)
+  grossAmount       Float            @default(0)
+  salesCash         Float            @default(0)
+  carRent           Float            @default(0)
+  akama             Float            @default(0)
+  fine              Float            @default(0)
+  bankDeduction     Float            @default(0)
+  deductions        Float            @default(0)
+  bonus             Float            @default(0)
+  netTotal          Float            @default(0)
+  grossRevenue      Float            @default(0)
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  rider             Rider            @relation(fields: [riderId], references: [id])
+  tenant            Tenant           @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, riderId, month, year])
+  @@index([tenantId, month, year])
+}
+
+model DailyEntry {
+  id             String   @id @default(cuid())
+  date           DateTime
+  riderId        String
+  batchId        String
+  singleOrders   Int      @default(0)
+  doubleOrders   Int      @default(0)
+  autoRateSingle Float
+  autoRateDouble Float
+  dailyAmount    Float    @default(0)
+  
+  // Rule B - Specialized Rates
+  riderRateSingle   Float?
+  riderRateDouble   Float?
+  companyRateSingle Float?
+  companyRateDouble Float?
+  companyAmount     Float?   @default(0)
+
+  payrollMonth   Int?
+  payrollYear    Int?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  batch          Batch    @relation(fields: [batchId], references: [id])
+  rider          Rider    @relation(fields: [riderId], references: [id])
+
+  @@unique([riderId, date])
+  @@index([payrollMonth, payrollYear])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String
+  details   String?
+  userId    String?
+  tenantId  String
+  createdAt DateTime @default(now())
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+}
+
+enum UserRole {
+  ADMIN
+  ACCOUNTANT
+}
+
+enum SalarySlipStatus {
+  DRAFT
+  FINAL
+}
+
+enum VehicleType {
+  CAR
+  BIKE
+}
+
+enum RateType {
+  TARGET
+  NO_TARGET
+}
+
+model RateConfig {
+  id                String       @id @default(cuid())
+  batchNumber       Int
+  vehicleType       VehicleType
+  rateType          RateType     @default(TARGET)
+  riderRateSingle   Float
+  riderRateDouble   Float
+  companyRateSingle Float
+  companyRateDouble Float
+  tenantId          String
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  tenant            Tenant       @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, batchNumber, vehicleType, rateType])
+}

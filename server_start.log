@@ -1,0 +1,46 @@
+
+> neqtra-salary-generator@1.0.0 dev
+> concurrently "npm run dev -w apps/web" "npm run start:dev -w apps/api"
+
+[1] 
+[1] > api@0.0.1 start:dev
+[1] > nest start --watch
+[1] 
+[0] 
+[0] > web@0.1.0 dev
+[0] > next dev --webpack
+[0] 
+[0] ⚠ Port 3000 is in use by process 16085, using available port 3001 instead.
+[0] ▲ Next.js 16.2.4 (webpack)
+[0] - Local:         http://localhost:3001
+[0] - Network:       http://192.168.0.153:3001
+[0] - Environments: .env.local
+[0] ✓ Ready in 907ms
+[0] ⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+[0]  We detected multiple lockfiles and selected the directory of /Users/medavarapu/package-lock.json as the root directory.
+[0]  To silence this warning, set `outputFileTracingRoot` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+[0]    See https://nextjs.org/docs/app/api-reference/config/next-config-js/output#caveats for more information.
+[0]  Detected additional lockfiles: 
+[0]    * /Users/medavarapu/Desktop/Desktop - mehar’s MacBook Pro/works/GD/package-lock.json
+[0] 
+[0] ⨯ Another next dev server is already running.
+[0] 
+[0] - Local:        http://localhost:3000
+[0] - PID:          16085
+[0] - Dir:          /Users/medavarapu/Desktop/Desktop - mehar’s MacBook Pro/works/GD/apps/web
+[0] - Log:          .next/dev/logs/next-development.log
+[0] 
+[0] Run kill 16085 to stop it.
+[0] [?25h
+[0] npm error Lifecycle script `dev` failed with error:
+[0] npm error code 1
+[0] npm error path /Users/medavarapu/Desktop/Desktop - mehar’s MacBook Pro/works/GD/apps/web
+[0] npm error workspace web@0.1.0
+[0] npm error location /Users/medavarapu/Desktop/Desktop - mehar’s MacBook Pro/works/GD/apps/web
+[0] npm error command failed
+[0] npm error command sh -c next dev --webpack
+[0] npm run dev -w apps/web exited with code 1
+[1] [2J[3J[H[[90m11:02:38 PM[0m] Starting compilation in watch mode...
+[1] 
+[1] [[90m11:02:48 PM[0m] Found 0 errors. Watching for file changes.
+[1] 
