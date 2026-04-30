@@ -72,5 +72,6 @@ COPY --from=builder /app/apps/api/prisma ./prisma
 
 EXPOSE 4000
 
-CMD ["npm", "run", "start:prod"]
+CMD ["sh", "-c", "npx prisma db seed && npm run start:prod"]
+
 
