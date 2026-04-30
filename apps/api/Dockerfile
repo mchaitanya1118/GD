@@ -3,6 +3,8 @@ FROM node:22-slim AS builder
 
 # Install build dependencies for native modules and Puppeteer
 RUN apt-get update && apt-get install -y \
+    openssl \
+    ca-certificates \
     python3 \
     make \
     g++ \
@@ -49,6 +51,8 @@ FROM node:22-slim
 
 # Install runtime dependencies for Puppeteer
 RUN apt-get update && apt-get install -y \
+    openssl \
+    ca-certificates \
     chromium \
     fonts-ipafont-gothic \
     fonts-wqy-zenhei \
