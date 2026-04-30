@@ -29,9 +29,14 @@ async function handleRequest(request: NextRequest, pathParts: string[]) {
   console.log(`[Proxy] ${request.method} ${request.nextUrl.pathname} -> ${targetUrl}`);
 
   try {
-    const body = ['POST', 'PATCH', 'PUT'].includes(request.method) 
-      ? await request.arrayBuffer() 
-      : undefined;
+    let body: ArrayBuffer | undefined;
+    try {
+      body = ['POST', 'PATCH', 'PUT'].includes(request.method) 
+        ? await request.arrayBuffer() 
+        : undefined;
+    } catch (e) {
+      console.warn(`[Proxy] Could not parse body for ${request.method} ${request.nextUrl.pathname}`);
+    }
 
     const headers = new Headers(request.headers);
     headers.delete('host'); // Let fetch set the correct host header for the internal network
