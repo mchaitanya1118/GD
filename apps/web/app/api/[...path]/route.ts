@@ -46,9 +46,8 @@ async function handleRequest(request: NextRequest, pathParts: string[]) {
     const data = await response.arrayBuffer();
     
     console.log(`[Proxy] Response from ${targetUrl}: ${response.status}`);
-
+    
     const responseHeaders = new Headers(response.headers);
-    // Remove headers that might cause issues when forwarded
     responseHeaders.delete('content-encoding');
     responseHeaders.delete('transfer-encoding');
 
@@ -57,10 +56,23 @@ async function handleRequest(request: NextRequest, pathParts: string[]) {
       headers: responseHeaders,
     });
   } catch (error: any) {
-    console.error(`[Proxy] Error fetching from ${targetUrl}:`, error);
+    console.error(`[Proxy] FATAL Error fetching from ${targetUrl}:`, {
+      message: error.message,
+      stack: error.stack,
+      targetUrl: targetUrl,
+      internalApiUrl: process.env.INTERNAL_API_URL
+    });
     return NextResponse.json(
-      { message: 'Internal API Gateway Error', error: error.message },
+      { 
+        message: 'Internal API Gateway Error', 
+        error: error.message,
+        debug: {
+          target: targetUrl,
+          internal: process.env.INTERNAL_API_URL || 'default'
+        }
+      },
       { status: 502 }
     );
   }
 }
+
