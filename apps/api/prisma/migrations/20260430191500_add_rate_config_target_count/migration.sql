@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "RateConfig" ADD COLUMN "targetCount" INTEGER NOT NULL DEFAULT 300;
