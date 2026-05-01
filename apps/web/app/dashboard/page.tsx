@@ -339,7 +339,7 @@ export default function DashboardPage() {
             <CardTitle className="text-2xl md:text-3xl font-black uppercase italic tracking-tight">Efficiency Analysis</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6 relative z-10 p-8 pt-0">
-            {loading ? (
+            {loading || !analytics ? (
               <div className="space-y-4">
                  <Skeleton className="h-4 w-full bg-white/10" />
                  <Skeleton className="h-20 w-full rounded-xl bg-white/10" />
@@ -347,16 +347,17 @@ export default function DashboardPage() {
             ) : (
               <>
                 <p className="text-slate-400 text-sm md:text-base font-medium leading-relaxed">
-                  Your current payroll distribution shows a growth of <span className="text-emerald-400 font-black italic">+{stats.insights.efficiencyGrowth}%</span>. The majority of operations are <span className="text-white font-bold">{stats.insights.dominantStructure}</span>, which currently maximizes your net profit margins.
+                  Your current payroll distribution shows a <span className="text-emerald-400 font-black italic">Target Achievement Rate of {analytics?.efficiency?.targetAchievementRate}%</span>. 
+                  The operational margin is currently <span className="text-white font-bold">{analytics?.efficiency?.operationalMargin}%</span>, which demonstrates high capital efficiency.
                 </p>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-6 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-sm group/stat hover:bg-white/10 transition-colors">
-                    <p className="text-[9px] font-black uppercase text-slate-500 tracking-widest mb-1 group-hover/stat:text-emerald-400 transition-colors">Average Earnings</p>
-                    <p className="text-xl md:text-2xl font-black text-white tracking-tighter">{format(stats.insights.avgSalary)}</p>
+                    <p className="text-[9px] font-black uppercase text-slate-500 tracking-widest mb-1 group-hover/stat:text-emerald-400 transition-colors">Avg Profit / Rider</p>
+                    <p className="text-xl md:text-2xl font-black text-white tracking-tighter">{format(analytics?.efficiency?.avgProfitPerRider || 0)}</p>
                   </div>
                   <div className="p-6 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-sm group/stat hover:bg-white/10 transition-colors">
-                    <p className="text-[9px] font-black uppercase text-slate-500 tracking-widest mb-1 group-hover/stat:text-amber-400 transition-colors">Top Performer</p>
-                    <p className="text-xl md:text-2xl font-black text-white tracking-tighter">{format(stats.insights.topEarner)}</p>
+                    <p className="text-[9px] font-black uppercase text-slate-500 tracking-widest mb-1 group-hover/stat:text-amber-400 transition-colors">Net Profit</p>
+                    <p className="text-xl md:text-2xl font-black text-white tracking-tighter">{format(analytics?.efficiency?.totalProfit || 0)}</p>
                   </div>
                 </div>
               </>

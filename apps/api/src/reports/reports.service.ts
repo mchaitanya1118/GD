@@ -160,71 +160,106 @@ export class ReportsService {
   }
 
   async getAnalyticsSummary(tenantId: string) {
-    const now = new Date();
-    const months: { month: number; year: number }[] = [];
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      months.push({ month: d.getMonth() + 1, year: d.getFullYear() });
+    console.log(`[ReportsService] Generating analytics for tenant: ${tenantId}`);
+    try {
+      const now = new Date();
+      const months: { month: number; year: number }[] = [];
+      for (let i = 5; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        months.push({ month: d.getMonth() + 1, year: d.getFullYear() });
+      }
+
+      const monthlyTrends = await Promise.all(
+        months.map(async ({ month, year }) => {
+          const slips = await this.prisma.payslip.findMany({
+            where: { tenantId, month, year },
+            select: {
+              netTotal: true,
+              grossRevenue: true,
+            },
+          });
+
+          const revenue = slips.reduce((sum, s) => sum + (s.grossRevenue || 0), 0);
+          const payout = slips.reduce((sum, s) => sum + (s.netTotal || 0), 0);
+
+          return {
+            name: new Date(year, month - 1).toLocaleString("default", {
+              month: "short",
+            }),
+            revenue,
+            payout,
+            profit: revenue - payout,
+          };
+        }),
+      );
+
+      const riders = await this.prisma.rider.findMany({
+        where: { tenantId },
+        select: { vehicleType: true },
+      });
+
+      const vehicleDist = riders.reduce((acc: any, curr) => {
+        acc[curr.vehicleType] = (acc[curr.vehicleType] || 0) + 1;
+        return acc;
+      }, {});
+
+      const topRidersSlips = await this.prisma.payslip.findMany({
+        where: {
+          tenantId,
+          month: now.getMonth() + 1,
+          year: now.getFullYear(),
+        },
+        include: { rider: true },
+        orderBy: { grossRevenue: "desc" },
+        take: 5,
+      });
+
+      const topRiders = topRidersSlips.map((s) => ({
+        name: s.rider.riderName,
+        revenue: s.grossRevenue,
+        payout: s.netTotal,
+      }));
+
+      // Advanced Efficiency Metrics
+      const currentMonthSlips = await this.prisma.payslip.findMany({
+        where: { tenantId, month: now.getMonth() + 1, year: now.getFullYear() },
+      });
+
+      const totalAchieved = currentMonthSlips.filter(s => s.targetAchieved).length;
+      const targetAchievementRate = currentMonthSlips.length > 0 
+        ? Math.round((totalAchieved / currentMonthSlips.length) * 100) 
+        : 0;
+
+      const totalRevenue = currentMonthSlips.reduce((sum, s) => sum + (s.grossRevenue || 0), 0);
+      const totalPayout = currentMonthSlips.reduce((sum, s) => sum + s.netTotal, 0);
+      const totalProfit = totalRevenue - totalPayout;
+      
+      const avgProfitPerRider = currentMonthSlips.length > 0 
+        ? Math.round(totalProfit / currentMonthSlips.length) 
+        : 0;
+
+      const operationalMargin = totalRevenue > 0 
+        ? Math.round((totalProfit / totalRevenue) * 100) 
+        : 0;
+
+      return {
+        monthlyTrends,
+        vehicleDistribution: [
+          { name: "CAR", value: vehicleDist.CAR || 0 },
+          { name: "BIKE", value: vehicleDist.BIKE || 0 },
+        ],
+        topRiders,
+        efficiency: {
+          targetAchievementRate,
+          avgProfitPerRider,
+          operationalMargin,
+          totalRevenue,
+          totalProfit
+        }
+      };
+    } catch (error) {
+      console.error("[ReportsService] Analytics Error:", error);
+      throw error;
     }
-
-    const monthlyTrends = await Promise.all(
-      months.map(async ({ month, year }) => {
-        const slips = await this.prisma.payslip.findMany({
-          where: { tenantId, month, year },
-          select: {
-            netTotal: true,
-            grossRevenue: true,
-          },
-        });
-
-        const revenue = slips.reduce((sum, s) => sum + (s.grossRevenue || 0), 0);
-        const payout = slips.reduce((sum, s) => sum + (s.netTotal || 0), 0);
-
-        return {
-          name: new Date(year, month - 1).toLocaleString("default", {
-            month: "short",
-          }),
-          revenue,
-          payout,
-          profit: revenue - payout,
-        };
-      }),
-    );
-
-    const riders = await this.prisma.rider.findMany({
-      where: { tenantId },
-      select: { vehicleType: true },
-    });
-
-    const vehicleDist = riders.reduce((acc: any, curr) => {
-      acc[curr.vehicleType] = (acc[curr.vehicleType] || 0) + 1;
-      return acc;
-    }, {});
-
-    const topRidersSlips = await this.prisma.payslip.findMany({
-      where: {
-        tenantId,
-        month: now.getMonth() + 1,
-        year: now.getFullYear(),
-      },
-      include: { rider: true },
-      orderBy: { grossRevenue: "desc" },
-      take: 5,
-    });
-
-    const topRiders = topRidersSlips.map((s) => ({
-      name: s.rider.riderName,
-      revenue: s.grossRevenue,
-      payout: s.netTotal,
-    }));
-
-    return {
-      monthlyTrends,
-      vehicleDistribution: [
-        { name: "CAR", value: vehicleDist.CAR || 0 },
-        { name: "BIKE", value: vehicleDist.BIKE || 0 },
-      ],
-      topRiders,
-    };
   }
 }
