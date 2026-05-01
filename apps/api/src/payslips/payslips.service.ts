@@ -393,6 +393,9 @@ export class PayslipsService {
     const payslip = await this.prisma.payslip.findUnique({ where: { id } });
     if (!payslip) throw new NotFoundException("Payslip not found");
 
+    const oldAdvanceDeduction = payslip.advanceDeduction || 0;
+    const newAdvanceDeduction = dto.advanceDeduction !== undefined ? dto.advanceDeduction : oldAdvanceDeduction;
+
     const updated = await this.prisma.payslip.update({
       where: { id },
       data: dto,
@@ -407,13 +410,61 @@ export class PayslipsService {
         updated.carRent +
         updated.akama +
         updated.fine +
-        updated.bankDeduction);
+        updated.bankDeduction +
+        updated.advanceDeduction);
 
-    return this.prisma.payslip.update({
+    const finalPayslip = await this.prisma.payslip.update({
       where: { id },
       data: { netTotal },
       include: { rider: true },
     });
+
+    // Update Advance Balances if deduction changed
+    if (newAdvanceDeduction !== oldAdvanceDeduction) {
+      const diff = newAdvanceDeduction - oldAdvanceDeduction;
+      await this.updateAdvanceBalances(payslip.riderId, payslip.tenantId, diff);
+    }
+
+    return finalPayslip;
+  }
+
+  private async updateAdvanceBalances(riderId: string, tenantId: string, amount: number) {
+    if (amount > 0) {
+      // Deduct from balance (FIFO)
+      const activeAdvances = await this.prisma.advance.findMany({
+        where: { riderId, tenantId, balance: { gt: 0 } },
+        orderBy: { createdAt: 'asc' }
+      });
+
+      let remainingToDeduct = amount;
+      for (const adv of activeAdvances) {
+        if (remainingToDeduct <= 0) break;
+        const deduction = Math.min(adv.balance, remainingToDeduct);
+        await this.prisma.advance.update({
+          where: { id: adv.id },
+          data: { balance: adv.balance - deduction }
+        });
+        remainingToDeduct -= deduction;
+      }
+    } else if (amount < 0) {
+      // Add back to balance (LIFO)
+      const lastAdvances = await this.prisma.advance.findMany({
+        where: { riderId, tenantId },
+        orderBy: { createdAt: 'desc' }
+      });
+
+      let remainingToAdd = Math.abs(amount);
+      for (const adv of lastAdvances) {
+        if (remainingToAdd <= 0) break;
+        const room = adv.amount - adv.balance;
+        const addition = Math.min(room, remainingToAdd);
+        await this.prisma.advance.update({
+          where: { id: adv.id },
+          data: { balance: adv.balance + addition }
+        });
+        remainingToAdd -= addition;
+      }
+    }
   }
 
   // function to sync payslip totals

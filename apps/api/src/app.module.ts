@@ -15,6 +15,7 @@ import { ReportsService } from "./reports/reports.service";
 import { MailModule } from "./mail/mail.module";
 import { UsersModule } from "./users/users.module";
 import { WhatsappModule } from "./whatsapp/whatsapp.module";
+import { AdvancesModule } from "./advances/advances.module";
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { WhatsappModule } from "./whatsapp/whatsapp.module";
     MailModule,
     UsersModule,
     WhatsappModule,
+    AdvancesModule,
   ],
   controllers: [AppController, ReportsController],
   providers: [AppService, PrismaService, ReportsService],

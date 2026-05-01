@@ -26,6 +26,8 @@ export default function RiderPayslipView({ riderId, month, year, onBack }: any) 
   const [akama, setAkama] = useState(0);
   const [fine, setFine] = useState(0);
   const [bankDeduction, setBankDeduction] = useState(0);
+  const [advanceDeduction, setAdvanceDeduction] = useState(0);
+  const [outstandingAdvance, setOutstandingAdvance] = useState(0);
   const [deductions, setDeductions] = useState(0);
   const [bonus, setBonus] = useState(0);
   const [status, setStatus] = useState('DRAFT');
@@ -37,6 +39,7 @@ export default function RiderPayslipView({ riderId, month, year, onBack }: any) 
 
   useEffect(() => {
     fetchPayslip();
+    fetchAdvances();
   }, [riderId, month, year]);
 
   const fetchPayslip = async () => {
@@ -50,6 +53,7 @@ export default function RiderPayslipView({ riderId, month, year, onBack }: any) 
       setAkama(p.akama || 0);
       setFine(p.fine || 0);
       setBankDeduction(p.bankDeduction || 0);
+      setAdvanceDeduction(p.advanceDeduction || 0);
       setDeductions(p.deductions || 0);
       setBonus(p.bonus || 0);
       setStatus(p.status || 'DRAFT');
@@ -57,6 +61,16 @@ export default function RiderPayslipView({ riderId, month, year, onBack }: any) 
       toast.error('Failed to load payslip data');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchAdvances = async () => {
+    try {
+      const res = await api.get(`/advances/rider/${riderId}`);
+      const totalBalance = res.data.reduce((sum: number, a: any) => sum + a.balance, 0);
+      setOutstandingAdvance(totalBalance);
+    } catch (err) {
+      console.error("Failed to fetch rider advances");
     }
   };
 
@@ -68,12 +82,14 @@ export default function RiderPayslipView({ riderId, month, year, onBack }: any) 
         akama,
         fine,
         bankDeduction,
+        advanceDeduction,
         deductions,
         bonus,
         status
       });
       toast.success('Salary Slip adjustments saved successfully');
       fetchPayslip(); 
+      fetchAdvances();
     } catch (error) {
       toast.error('Failed to save adjustments');
     }
@@ -140,7 +156,7 @@ export default function RiderPayslipView({ riderId, month, year, onBack }: any) 
   const weeklyColumns = Array.from(groupedMap.values()).sort((a, b) => a.date.localeCompare(b.date));
 
   const gross = data.payslip.grossAmount;
-  const net = gross + bonus - (salesCash + carRent + akama + fine + bankDeduction + deductions);
+  const net = gross + bonus - (salesCash + carRent + akama + fine + bankDeduction + advanceDeduction + deductions);
   const monthName = new Intl.DateTimeFormat('en-US', { month: 'long' }).format(new Date(year, month - 1)).toUpperCase();
 
   return (
@@ -479,11 +495,22 @@ export default function RiderPayslipView({ riderId, month, year, onBack }: any) 
               </div>
 
               <div className="col-span-1 p-2 md:p-3 bg-[#fce5cd] border-r border-slate-300 text-center flex items-center justify-center">BANK</div>
-              <div className="col-span-1 md:col-span-5 p-0 flex">
+              <div className="col-span-1 md:col-span-2 p-0 flex border-r border-slate-300">
                 {isCapturing ? (
                   <span className="w-full bg-white text-center font-mono text-sm px-2 py-2">{bankDeduction}</span>
                 ) : (
                   <input type="number" value={bankDeduction} onChange={e => setBankDeduction(parseFloat(e.target.value) || 0)} className="w-full bg-white text-center font-mono text-sm outline-none px-2 h-10" />
+                )}
+              </div>
+              <div className="col-span-1 p-2 md:p-3 bg-[#fce5cd] border-r border-slate-300 text-center flex flex-col items-center justify-center">
+                 <span>ADVANCE</span>
+                 <span className="text-[7px] text-emerald-600 font-bold">(BAL: {outstandingAdvance})</span>
+              </div>
+              <div className="col-span-1 md:col-span-2 p-0 flex">
+                {isCapturing ? (
+                  <span className="w-full bg-white text-center font-mono text-sm px-2 py-2">{advanceDeduction}</span>
+                ) : (
+                  <input type="number" value={advanceDeduction} onChange={e => setAdvanceDeduction(parseFloat(e.target.value) || 0)} className="w-full bg-white text-center font-mono text-sm outline-none px-2 h-10" />
                 )}
               </div>
            </div>

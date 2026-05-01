@@ -23,6 +23,7 @@ const navItems = [
   { title: 'Upload Excel', href: '/dashboard/upload', icon: FileText },
   { title: 'Riders', href: '/dashboard/riders', icon: Users },
   { title: 'Payroll', href: '/dashboard/payroll', icon: BarChart },
+  { title: 'Advances', href: '/dashboard/advances', icon: TrendingUp },
   { title: 'Reports', href: '/dashboard/reports', icon: TrendingUp },
   { title: 'Settings', href: '/dashboard/settings', icon: Settings },
 ];
