@@ -147,36 +147,30 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         {loading ? (
           Array(4).fill(0).map((_, i) => (
-            <Skeleton key={i} className="h-24 rounded-[2rem]" />
+            <Skeleton key={i} className="h-20 rounded-2xl" />
           ))
         ) : (
           cards.map((card, index) => (
             <motion.div
               key={card.title}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
+              transition={{ delay: index * 0.05 }}
               className="group relative"
             >
-              <div className={`absolute -inset-0.5 bg-gradient-to-r ${
-                index === 0 ? 'from-blue-500 to-indigo-600' :
-                index === 1 ? 'from-emerald-500 to-teal-600' :
-                index === 2 ? 'from-amber-500 to-orange-600' :
-                'from-indigo-500 to-purple-600'
-              } rounded-[2rem] blur opacity-10 group-hover:opacity-30 transition duration-500`}></div>
-              <Card className="relative glass-card border-none shadow-lg h-full overflow-hidden bg-white/80 backdrop-blur-xl rounded-[2rem] transition-all duration-500 group-hover:-translate-y-1">
-                <CardHeader className="p-3 md:p-4 pb-1">
-                  <div className={`h-8 w-8 rounded-lg ${card.color.replace('bg-', 'bg-opacity-10 text-').replace('-500', '-600')} flex items-center justify-center mb-2 shadow-sm group-hover:scale-110 transition-transform duration-500`}>
-                    <card.icon size={16} />
+              <Card className="relative glass-card border-none shadow-md h-full overflow-hidden bg-white/80 backdrop-blur-xl rounded-2xl transition-all duration-300">
+                <CardContent className="p-3 md:p-4">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <div className={`h-6 w-6 rounded-md ${card.color.replace('bg-', 'bg-opacity-10 text-').replace('-500', '-600')} flex items-center justify-center shrink-0 shadow-sm`}>
+                      <card.icon size={12} />
+                    </div>
+                    <CardTitle className="text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-[0.15em] leading-none">{card.title}</CardTitle>
                   </div>
-                  <CardTitle className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{card.title}</CardTitle>
-                </CardHeader>
-                <CardContent className="p-3 md:p-4 pt-0">
-                  <div className="text-lg md:text-xl font-black text-slate-900 tracking-tighter">{card.value}</div>
-                  <p className="text-[8px] text-slate-500 font-medium mt-0.5 leading-tight line-clamp-1">{card.description}</p>
+                  <div className="text-base md:text-xl font-black text-slate-900 tracking-tighter leading-none">{card.value}</div>
+                  <p className="text-[7px] md:text-[8px] text-slate-400 font-medium mt-1 leading-none tracking-tight truncate">{card.description}</p>
                 </CardContent>
               </Card>
             </motion.div>
