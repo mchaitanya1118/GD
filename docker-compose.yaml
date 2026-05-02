@@ -34,6 +34,8 @@ services:
       - SMTP_FROM=${SMTP_FROM:-Neqtra Payroll <your-email@gmail.com>}
     ports:
       - "4000:4000"
+    volumes:
+      - whatsapp_session:/app/.wwebjs_auth
 
   web:
     build:
@@ -44,9 +46,11 @@ services:
       - api
     environment:
       - PORT=${WEB_PORT:-3000}
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-/api}
       - INTERNAL_API_URL=${INTERNAL_API_URL:-http://api:4000}
     ports:
       - "3000:3000"
 
 volumes:
   postgres_data:
+  whatsapp_session:
