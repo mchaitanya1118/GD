@@ -27,12 +27,17 @@ export class PayslipsController {
     @Query("year") year: string,
     @Query("search") search?: string,
   ) {
-    return this.payslipsService.getDashboard(
-      req.user.tenantId,
-      parseInt(month),
-      parseInt(year),
-      search,
-    );
+    try {
+      return await this.payslipsService.getDashboard(
+        req.user.tenantId,
+        parseInt(month),
+        parseInt(year),
+        search,
+      );
+    } catch (error: any) {
+      console.error('[PayslipsController] Dashboard Failure:', error);
+      throw new Error(`Dashboard Protocol Error: ${error.message}`);
+    }
   }
 
   @Get()

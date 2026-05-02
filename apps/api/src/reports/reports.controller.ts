@@ -93,10 +93,15 @@ export class ReportsController {
     @Query("month") month?: string,
     @Query("year") year?: string,
   ) {
-    return this.reportsService.getAnalyticsSummary(
-      req.user.tenantId,
-      month ? parseInt(month) : undefined,
-      year ? parseInt(year) : undefined,
-    );
+    try {
+      return await this.reportsService.getAnalyticsSummary(
+        req.user.tenantId,
+        month ? parseInt(month) : undefined,
+        year ? parseInt(year) : undefined,
+      );
+    } catch (error: any) {
+      console.error('[ReportsController] Analytics Failure:', error);
+      throw new Error(`Analytics Engine Error: ${error.message}`);
+    }
   }
 }
