@@ -3,13 +3,13 @@ FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-# Copy root package.json and monorepo files
+# Copy root and all workspace package files
 COPY package.json package-lock.json ./
 COPY apps/web/package.json ./apps/web/
-# If the frontend relies on anything in packages/ add it here, e.g.:
-# COPY packages ./packages/
+COPY apps/api/package.json ./apps/api/
+COPY packages ./packages
 
-# Install dependencies (including those for the monorepo)
+# Install dependencies for the entire monorepo
 RUN npm install --include=dev
 
 # Copy source

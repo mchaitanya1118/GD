@@ -1,45 +1,31 @@
-# Use Node.js base image (Debian-based for better Puppeteer compatibility)
+# Use Node.js base image
 FROM node:22-slim AS builder
 
-# Install build dependencies for native modules and Puppeteer
+# Install build dependencies for native modules and Prisma
 RUN apt-get update && apt-get install -y \
     openssl \
     ca-certificates \
     python3 \
     make \
     g++ \
-    chromium \
-    libnss3 \
-    libatk1.0-0 \
-    libatk-bridge2.0-0 \
-    libcups2 \
-    libdrm2 \
-    libxkbcommon0 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxext6 \
-    libxfixes3 \
-    libxrandr2 \
-    libgbm1 \
-    libasound2 \
-    libpangocairo-1.0-0 \
-    libpango-1.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# Copy root package.json and monorepo files
+# Copy root and all workspace package files to ensure dependency resolution
 COPY package.json package-lock.json ./
 COPY apps/api/package.json ./apps/api/
+COPY apps/web/package.json ./apps/web/
+# Copy empty folders for packages if they exist or just the package.json if they have them
+COPY packages ./packages
 
-# Install dependencies
+# Install dependencies for the entire monorepo
 RUN npm install --include=dev
 
 # Copy source and prisma
 COPY apps/api ./apps/api
-COPY packages ./packages
 
-# Build Prisma client
+# Generate Prisma Client
 WORKDIR /app/apps/api
 RUN npx prisma generate
 
