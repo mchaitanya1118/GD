@@ -15,6 +15,9 @@ const outfit = Outfit({
 export const metadata: Metadata = {
   title: "Neqtra Payroll | Advanced Salary Slip Generator",
   description: "Enterprise-grade payroll and salary slip generation for modern businesses.",
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({

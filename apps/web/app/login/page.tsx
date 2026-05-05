@@ -64,7 +64,10 @@ export default function LoginPage() {
       <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 pointer-events-none"></div>
       
       <Card className="w-full max-w-md border-slate-800 bg-slate-900/80 backdrop-blur-xl shadow-2xl">
-        <CardHeader className="space-y-1 text-center">
+        <CardHeader className="space-y-4 text-center">
+          <div className="flex justify-center">
+            <img src="/favicon.ico" alt="Logo" className="h-16 w-16 rounded-2xl shadow-2xl shadow-emerald-500/20" />
+          </div>
           <CardTitle className="text-3xl font-black text-white tracking-tighter uppercase italic">
             Neqtra <span className="text-emerald-500">Payroll</span>
           </CardTitle>

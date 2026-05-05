@@ -49,10 +49,13 @@ const SidebarContent = ({
       !sidebarOpen && !isMobile && "justify-center"
     )}>
       <div className={cn(
-        "text-xl font-black tracking-tighter uppercase italic text-white transition-all duration-300 overflow-hidden whitespace-nowrap",
+        "flex items-center gap-3 transition-all duration-300 overflow-hidden",
         (sidebarOpen || isMobile) ? "opacity-100 w-auto" : "opacity-0 w-0"
       )}>
-        Neqtra <span className="text-emerald-500">P.</span>
+        <img src="/favicon.ico" alt="Logo" className="h-8 w-8 rounded-lg shrink-0" />
+        <span className="text-xl font-black tracking-tighter uppercase italic text-white">
+          Neqtra <span className="text-emerald-500">P.</span>
+        </span>
       </div>
       {!isMobile && (
         <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-1 hover:bg-slate-800 rounded transition-colors text-slate-400">
