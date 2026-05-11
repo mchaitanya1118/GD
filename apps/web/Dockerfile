@@ -30,20 +30,22 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
 
 # Install runtime dependencies
 RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
 # Copy Next.js standalone output
+# The standalone output includes all necessary files in the apps/web folder
+COPY --from=builder /app/apps/web/.next/standalone ./
 COPY --from=builder /app/apps/web/public ./apps/web/public
 COPY --from=builder /app/apps/web/.next/static ./apps/web/.next/static
-COPY --from=builder /app/apps/web/.next/standalone ./
 
 EXPOSE 3000
 
-# Healthcheck for Coolify
-HEALTHCHECK --interval=30s --timeout=30s --start-period=60s --retries=5 \
+# Healthcheck for Coolify - simplified and relaxed
+HEALTHCHECK --interval=10s --timeout=5s --start-period=30s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3000', (res) => { if (res.statusCode === 200) process.exit(0); else process.exit(1); })" || exit 1
 
-# The standalone output preserves the monorepo structure
-CMD ["sh", "-c", "echo '🚀 Starting Web...' && node apps/web/server.js"]
+# Start the server
+CMD ["node", "apps/web/server.js"]

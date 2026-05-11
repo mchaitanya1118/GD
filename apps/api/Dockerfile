@@ -96,7 +96,7 @@ EXPOSE 4000
 HEALTHCHECK --interval=30s --timeout=30s --start-period=60s --retries=5 \
   CMD node -e "require('http').get('http://localhost:4000/health', (res) => { if (res.statusCode === 200) process.exit(0); else process.exit(1); })" || exit 1
 
-CMD ["sh", "-c", "echo '🚀 Starting API...' && npx prisma migrate deploy && echo '✅ Migrations complete' && npx prisma db seed || echo 'ℹ️ Seed skipped' && npm run start:prod"]
+CMD ["sh", "-c", "if [ -z \"$DATABASE_URL\" ]; then echo '❌ ERROR: DATABASE_URL is not set' && exit 1; fi && echo '🚀 Starting API...' && npx prisma migrate deploy && echo '✅ Migrations complete' && npx prisma db seed || echo 'ℹ️ Seed skipped' && npm run start:prod"]
 
 
 
