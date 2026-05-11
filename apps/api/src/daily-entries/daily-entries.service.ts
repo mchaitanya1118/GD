@@ -79,31 +79,34 @@ export class DailyEntriesService {
       let batchId = existingEntry?.batchId;
       let batchNumber = 0;
 
-      if (!batchId) {
-        // Find the most recent batch for this tenant
-        const latestBatch = await this.prisma.batch.findFirst({
-          where: { tenantId },
-          orderBy: { createdAt: 'desc' }
-        });
-        if (latestBatch) {
-          batchId = latestBatch.id;
-          batchNumber = latestBatch.batchNumber;
+      // If rider is NOT in a group, we MUST have a batch
+      if (!rider.groupId) {
+        if (!batchId) {
+          // Find the most recent batch for this tenant
+          const latestBatch = await this.prisma.batch.findFirst({
+            where: { tenantId },
+            orderBy: { createdAt: 'desc' }
+          });
+          if (latestBatch) {
+            batchId = latestBatch.id;
+            batchNumber = latestBatch.batchNumber;
+          } else {
+             // Create a default batch if none exists
+             const newBatch = await this.prisma.batch.create({
+               data: {
+                 tenantId,
+                 batchNumber: 1,
+                 rateSingleOrder: 0,
+                 rateDoubleOrder: 0
+               }
+             });
+             batchId = newBatch.id;
+             batchNumber = 1;
+          }
         } else {
-           // Create a default batch if none exists
-           const newBatch = await this.prisma.batch.create({
-             data: {
-               tenantId,
-               batchNumber: 1,
-               rateSingleOrder: 0,
-               rateDoubleOrder: 0
-             }
-           });
-           batchId = newBatch.id;
-           batchNumber = 1;
+          const batch = await this.prisma.batch.findUnique({ where: { id: batchId } });
+          batchNumber = batch?.batchNumber || 0;
         }
-      } else {
-        const batch = await this.prisma.batch.findUnique({ where: { id: batchId } });
-        batchNumber = batch?.batchNumber || 0;
       }
 
       // Calculate Amount based on rates

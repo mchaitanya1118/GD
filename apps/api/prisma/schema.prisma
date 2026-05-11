@@ -156,11 +156,11 @@ model DailyEntry {
   id             String   @id @default(cuid())
   date           DateTime
   riderId        String
-  batchId        String
+  batchId        String?
   singleOrders   Int      @default(0)
   doubleOrders   Int      @default(0)
-  autoRateSingle Float
-  autoRateDouble Float
+  autoRateSingle Float?   @default(0)
+  autoRateDouble Float?   @default(0)
   dailyAmount    Float    @default(0)
   
   // Rule B - Specialized Rates
@@ -169,7 +169,7 @@ model DailyEntry {
   companyRateSingle Float?
   companyRateDouble Float?
   companyAmount     Float?   @default(0)
-
+  
   status         String?  @default("working")
   cashCollected  Float?   @default(0)
   orders         Int      @default(0)
@@ -178,7 +178,7 @@ model DailyEntry {
   payrollYear    Int?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
-  batch          Batch    @relation(fields: [batchId], references: [id])
+  batch          Batch?    @relation(fields: [batchId], references: [id])
   rider          Rider    @relation(fields: [riderId], references: [id])
 
   @@unique([riderId, date])

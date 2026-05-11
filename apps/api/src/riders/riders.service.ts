@@ -23,6 +23,7 @@ export class RidersService {
         vehicleOwnership: data.vehicleOwnership || data.vehicle_ownership || null,
         vehicleNumber: data.vehicleNumber || data.vehicle_number || null,
         vehicleModel: data.vehicleModel || data.vehicle_model || null,
+        groupId: data.groupId || null,
       },
     });
   }
@@ -113,6 +114,7 @@ export class RidersService {
           (data.vehicleModel || data.vehicle_model) !== undefined
             ? data.vehicleModel || data.vehicle_model
             : undefined,
+        groupId: data.groupId !== undefined ? data.groupId : undefined,
       },
     });
   }

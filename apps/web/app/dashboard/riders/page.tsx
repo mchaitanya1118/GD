@@ -31,6 +31,7 @@ interface Rider {
   vehicleOwnership?: string;
   vehicleNumber?: string;
   vehicleModel?: string;
+  groupId?: string;
   createdAt: string;
 }
 
@@ -44,6 +45,7 @@ export default function RidersPage() {
   const [vehicleFilter, setVehicleFilter] = useState('ALL');
   const [companyFilter, setCompanyFilter] = useState('ALL');
   const [availableCompanies, setAvailableCompanies] = useState<string[]>([]);
+  const [groups, setGroups] = useState<{id: string, name: string}[]>([]);
 
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -60,6 +62,7 @@ export default function RidersPage() {
   const [newVehicleOwnership, setNewVehicleOwnership] = useState('');
   const [newVehicleNumber, setNewVehicleNumber] = useState('');
   const [newVehicleModel, setNewVehicleModel] = useState('');
+  const [newGroupId, setNewGroupId] = useState<string | null>(null);
 
   const fetchRiders = async () => {
     try {
@@ -78,17 +81,18 @@ export default function RidersPage() {
     }
   };
 
-  const fetchCompanies = async () => {
+  const fetchGroups = async () => {
     try {
-      const res = await api.get('/riders/companies');
-      setAvailableCompanies(res.data);
+      const res = await api.get('/rider-groups');
+      setGroups(res.data);
     } catch (error) {
-      console.error('Failed to load companies');
+      console.error('Failed to load groups');
     }
   };
 
   useEffect(() => {
     fetchCompanies();
+    fetchGroups();
   }, []);
 
   useEffect(() => {
@@ -110,9 +114,9 @@ export default function RidersPage() {
     setNewStatus('ACTIVE');
     setNewZone('');
     setNewNationality('');
-    setNewVehicleOwnership('');
     setNewVehicleNumber('');
     setNewVehicleModel('');
+    setNewGroupId('none');
     setOpen(true);
   };
 
@@ -128,9 +132,9 @@ export default function RidersPage() {
     setNewStatus(rider.status || 'ACTIVE');
     setNewZone(rider.zone || '');
     setNewNationality(rider.nationality || '');
-    setNewVehicleOwnership(rider.vehicleOwnership || '');
     setNewVehicleNumber(rider.vehicleNumber || '');
     setNewVehicleModel(rider.vehicleModel || '');
+    setNewGroupId(rider.groupId || 'none');
     setOpen(true);
   };
 
@@ -153,6 +157,7 @@ export default function RidersPage() {
           vehicleOwnership: newVehicleOwnership,
           vehicleNumber: newVehicleNumber,
           vehicleModel: newVehicleModel,
+          groupId: newGroupId === 'none' ? null : newGroupId,
         });
       } else {
         await api.post('/riders', {
@@ -169,6 +174,7 @@ export default function RidersPage() {
           vehicleOwnership: newVehicleOwnership,
           vehicleNumber: newVehicleNumber,
           vehicleModel: newVehicleModel,
+          groupId: newGroupId === 'none' ? null : newGroupId,
         });
       }
       toast.success(editingId ? "Pilot profile updated" : "New pilot enrolled successfully");
@@ -448,6 +454,20 @@ export default function RidersPage() {
                     <SelectContent className="rounded-xl border-slate-100 shadow-2xl">
                       <SelectItem value="TARGET" className="font-bold">🎯 TARGET BASED</SelectItem>
                       <SelectItem value="NO_TARGET" className="font-bold">⚡ NO TARGET / FLAT</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[10px] uppercase font-black tracking-widest text-slate-400 pl-1">ASSIGNED GROUP</Label>
+                  <Select value={newGroupId || 'none'} onValueChange={(v) => setNewGroupId(v)}>
+                    <SelectTrigger className="rounded-xl h-12 border-slate-200 font-bold uppercase text-[10px] tracking-widest">
+                      <SelectValue placeholder="Select Group" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl border-slate-100 shadow-2xl">
+                      <SelectItem value="none" className="font-bold text-slate-400">NO GROUP</SelectItem>
+                      {groups.map(g => (
+                        <SelectItem key={g.id} value={g.id} className="font-bold">{g.name}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>

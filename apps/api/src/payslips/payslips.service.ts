@@ -352,20 +352,31 @@ export class PayslipsService {
       let targetAchieved = false;
 
       if (rider.rateType === "TARGET" && riderEntries.length > 0) {
-        const sampleEntry = riderEntries[0];
-        const batch = batches.find(b => b.id === sampleEntry.batchId);
-        
-        if (batch) {
-          const rateConfig = rateConfigs.find(rc => 
-            rc.batchNumber === batch.batchNumber && 
-            rc.vehicleType === rider.vehicleType && 
-            rc.rateType === "TARGET"
-          );
-          if (rateConfig) {
-            targetOrders = rateConfig.targetCount;
-            targetAchieved = (totalSingle + totalDouble) >= targetOrders;
+        // Priority 1: Group Target
+        const groupRate = rider.groupId ? groupRates.find(gr => 
+          gr.groupId === rider.groupId && 
+          gr.vehicleType === rider.vehicleType && 
+          gr.rateType === "TARGET"
+        ) : null;
+
+        if (groupRate) {
+          targetOrders = groupRate.targetCount;
+        } else {
+          // Priority 2: Batch Target
+          const sampleEntry = riderEntries[0];
+          const batch = batches.find(b => b.id === sampleEntry.batchId);
+          if (batch) {
+            const rateConfig = rateConfigs.find(rc => 
+              rc.batchNumber === batch.batchNumber && 
+              rc.vehicleType === rider.vehicleType && 
+              rc.rateType === "TARGET"
+            );
+            if (rateConfig) {
+              targetOrders = rateConfig.targetCount;
+            }
           }
         }
+        targetAchieved = (totalSingle + totalDouble) >= targetOrders;
       }
 
       const data = {
@@ -708,26 +719,44 @@ export class PayslipsService {
       if (entries.length > 0) {
         const sampleEntry = entries[0];
         if (rider && rider.rateType === "TARGET") {
-          // Get batch number from the sample entry
-          const batch = await this.prisma.batch.findUnique({
-            where: { id: sampleEntry.batchId },
-          });
+          // Priority 1: Group Target
+          if (rider.groupId) {
+             const groupRate = await this.prisma.groupRate.findUnique({
+               where: {
+                 groupId_vehicleType_rateType: {
+                   groupId: rider.groupId,
+                   vehicleType: rider.vehicleType,
+                   rateType: "TARGET"
+                 }
+               }
+             });
+             if (groupRate) {
+               targetOrders = groupRate.targetCount;
+             }
+          }
 
-          if (batch) {
-            const rateConfig = await this.prisma.rateConfig.findFirst({
-              where: {
-                tenantId,
-                batchNumber: batch.batchNumber,
-                vehicleType: rider.vehicleType,
-                rateType: "TARGET",
-              },
+          // Priority 2: Batch Target (if no group target found)
+          if (targetOrders === 0) {
+            const batch = await this.prisma.batch.findUnique({
+              where: { id: sampleEntry.batchId || '' },
             });
-            if (rateConfig) {
-              targetOrders = rateConfig.targetCount;
-              targetAchieved =
-                (totalSingle || 0) + (totalDouble || 0) >= targetOrders;
+
+            if (batch) {
+              const rateConfig = await this.prisma.rateConfig.findFirst({
+                where: {
+                  tenantId,
+                  batchNumber: batch.batchNumber,
+                  vehicleType: rider.vehicleType,
+                  rateType: "TARGET",
+                },
+              });
+              if (rateConfig) {
+                targetOrders = rateConfig.targetCount;
+              }
             }
           }
+          
+          targetAchieved = (totalSingle || 0) + (totalDouble || 0) >= targetOrders;
         }
       }
     } catch (e) {
