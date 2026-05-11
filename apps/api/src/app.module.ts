@@ -18,6 +18,7 @@ import { WhatsappModule } from "./whatsapp/whatsapp.module";
 import { AdvancesModule } from "./advances/advances.module";
 import { DailyEntriesModule } from "./daily-entries/daily-entries.module";
 import { RiderGroupsModule } from "./rider-groups/rider-groups.module";
+import { GpsModule } from "./gps/gps.module";
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { RiderGroupsModule } from "./rider-groups/rider-groups.module";
     AdvancesModule,
     DailyEntriesModule,
     RiderGroupsModule,
+    GpsModule,
   ],
   controllers: [AppController, ReportsController],
   providers: [AppService, PrismaService, ReportsService],

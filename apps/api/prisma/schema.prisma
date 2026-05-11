@@ -56,6 +56,10 @@ model Rider {
   vehicleModel      String?
   groupId      String?
   group        RiderGroup?  @relation(fields: [groupId], references: [id])
+  lastLat           Float?
+  lastLng           Float?
+  lastLocationUpdate DateTime?
+  locations    RiderLocation[]
   dailyEntries DailyEntry[]
   payslips     Payslip[]
   advances     Advance[]
@@ -150,6 +154,16 @@ model Advance {
   updatedAt   DateTime @updatedAt
   rider       Rider    @relation(fields: [riderId], references: [id])
   tenant      Tenant   @relation(fields: [tenantId], references: [id])
+}
+
+model RiderLocation {
+  id        String   @id @default(cuid())
+  riderId   String
+  lat       Float
+  lng       Float
+  timestamp DateTime @default(now())
+  rider     Rider    @relation(fields: [riderId], references: [id])
+  @@index([riderId, timestamp])
 }
 
 model DailyEntry {

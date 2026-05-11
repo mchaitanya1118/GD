@@ -31,6 +31,7 @@ const navItems = [
   { title: 'Payroll', href: '/dashboard/payroll', icon: BarChart },
   { title: 'Advances', href: '/dashboard/advances', icon: TrendingUp },
   { title: 'Reports', href: '/dashboard/reports', icon: PieChart },
+  { title: 'GPS Tracking', href: '/dashboard/gps', icon: Navigation },
   { title: 'Settings', href: '/dashboard/settings', icon: Settings },
 ];
 
