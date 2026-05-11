@@ -43,7 +43,7 @@ export default function MapComponent({ riders, center, activeRiderId }: any) {
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       />
       {center && <RecenterMap position={center} />}
-      {riders.map((rider: any) => (
+      {riders.filter((r: any) => r.lastLat && r.lastLng).map((rider: any) => (
         <Marker 
           key={rider.id} 
           position={[rider.lastLat, rider.lastLng]}
