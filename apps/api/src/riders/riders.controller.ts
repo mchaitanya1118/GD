@@ -64,4 +64,15 @@ export class RidersController {
   ) {
     return this.ridersService.updateRider(req.user.tenantId, id, body);
   }
+
+  // GPS Endpoints
+  @Post("gps/update")
+  async updateLocation(@Body() body: { riderId: string; lat: number; lng: number }) {
+    return this.ridersService.updateLocation(body.riderId, body.lat, body.lng);
+  }
+
+  @Get("gps/active")
+  async getActiveLocations(@Request() req: any) {
+    return this.ridersService.getActiveLocations(req.user.tenantId);
+  }
 }

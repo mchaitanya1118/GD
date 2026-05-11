@@ -25,7 +25,7 @@ export default function GPSTrackingPage() {
 
   const fetchLocations = async () => {
     try {
-      const res = await api.get('/gps/active');
+      const res = await api.get('/riders/gps/active');
       setRiders(res.data);
     } catch (error) {
       console.error('Failed to fetch rider locations');

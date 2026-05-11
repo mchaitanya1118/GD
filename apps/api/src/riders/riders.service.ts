@@ -135,4 +135,46 @@ export class RidersService {
       return [];
     }
   }
+
+  // GPS Tracking Methods
+  async updateLocation(riderId: string, lat: number, lng: number) {
+    const timestamp = new Date();
+    await this.prisma.rider.update({
+      where: { id: riderId },
+      data: {
+        lastLat: lat,
+        lastLng: lng,
+        lastLocationUpdate: timestamp,
+      }
+    });
+
+    return this.prisma.riderLocation.create({
+      data: {
+        riderId,
+        lat,
+        lng,
+        timestamp,
+      }
+    });
+  }
+
+  async getActiveLocations(tenantId: string) {
+    return this.prisma.rider.findMany({
+      where: {
+        tenantId,
+        lastLat: { not: null },
+        lastLng: { not: null },
+      },
+      select: {
+        id: true,
+        riderId: true,
+        riderName: true,
+        lastLat: true,
+        lastLng: true,
+        lastLocationUpdate: true,
+        status: true,
+        vehicleType: true,
+      }
+    });
+  }
 }
