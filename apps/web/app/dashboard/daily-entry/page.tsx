@@ -127,7 +127,7 @@ export default function DailyEntryGrid() {
       return entry[field];
     }
     
-    if (field === 'status') return 'working';
+    if (field === 'status') return '';
     return 0;
   }, [year, month, pendingChanges, entryMap]);
 
@@ -145,6 +145,18 @@ export default function DailyEntryGrid() {
     });
     return summaries;
   }, [riders, entryMap, pendingChanges, daysArray, getEntryValue]);
+
+  const selectedDateStats = useMemo(() => {
+    let totalOrders = 0;
+    let totalCash = 0;
+    riders.forEach(rider => {
+      const orders = getEntryValue(rider.id, selectedDate, 'orders');
+      const cash = getEntryValue(rider.id, selectedDate, 'cashCollected');
+      totalOrders += typeof orders === 'number' ? orders : 0;
+      totalCash += typeof cash === 'number' ? cash : 0;
+    });
+    return { totalOrders, totalCash };
+  }, [riders, selectedDate, getEntryValue]);
 
   const filteredRiders = useMemo(() => {
     if (!searchQuery) return riders;
@@ -191,54 +203,54 @@ export default function DailyEntryGrid() {
   }, [firstDayOfMonth, daysInMonth]);
 
   return (
-    <div className="max-w-[100vw] overflow-hidden flex flex-col h-[calc(100vh-100px)] space-y-6">
+    <div className="max-w-[100vw] flex flex-col space-y-6 pb-10">
       {/* Top Header */}
-      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 bg-white/40 backdrop-blur-xl p-8 rounded-[2.5rem] premium-shadow border border-white/60 mx-4 mt-4">
-        <div className="flex flex-wrap items-center gap-8">
-          <div className="h-20 w-28 bg-slate-900 rounded-[1.75rem] flex flex-col items-center justify-center shadow-2xl shadow-slate-200 border-4 border-white/10 group overflow-hidden relative shrink-0">
+      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 bg-white/40 backdrop-blur-xl p-6 rounded-3xl premium-shadow border border-white/60 mx-4 mt-4">
+        <div className="flex flex-wrap items-center gap-6">
+          <div className="h-16 w-24 bg-slate-900 rounded-2xl flex flex-col items-center justify-center shadow-lg border-2 border-white/10 group overflow-hidden relative shrink-0">
              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-             <span className="text-3xl font-black text-white tracking-tighter leading-none relative z-10">{totalWorked}</span>
-             <span className="text-[7px] font-black text-emerald-500 uppercase tracking-[0.2em] mt-1 relative z-10">Total Worked</span>
+             <span className="text-2xl font-bold text-white leading-none relative z-10">{totalWorked}</span>
+             <span className="text-[9px] font-semibold text-emerald-400 uppercase tracking-wider mt-1 relative z-10">Total Worked</span>
           </div>
           
           <div className="flex items-center gap-4">
-            <div className="h-12 w-12 bg-emerald-500 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-200 shrink-0">
+            <div className="h-12 w-12 bg-emerald-500 rounded-2xl flex items-center justify-center shadow-md shrink-0">
               <Calendar className="text-white" size={24} />
             </div>
             <div>
-              <h2 className="text-2xl font-black text-slate-900 tracking-tighter uppercase italic leading-tight">Attendance Calendar</h2>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Interactive Performance Hub</p>
+              <h2 className="text-xl font-bold text-slate-900 tracking-tight">Attendance Calendar</h2>
+              <p className="text-xs font-medium text-slate-500">Interactive Performance Hub</p>
             </div>
           </div>
         </div>
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full xl:w-auto">
           <div className="flex items-center gap-3 flex-1 xl:flex-none">
-            <Select value={String(month)} onValueChange={(val) => setMonth(parseInt(val))}>
-              <SelectTrigger className="h-12 rounded-xl bg-white border-none shadow-sm font-black text-xs uppercase tracking-widest min-w-[140px]">
+            <Select value={String(month)} onValueChange={(val) => { if (val) setMonth(parseInt(val)); }}>
+              <SelectTrigger className="h-10 rounded-xl bg-white border-slate-200 shadow-sm font-semibold text-sm min-w-[120px]">
                 <SelectValue placeholder="Month" />
               </SelectTrigger>
-              <SelectContent className="rounded-xl border-none shadow-2xl">
+              <SelectContent className="rounded-xl border-slate-100 shadow-xl">
                 {months.map((m, i) => (
-                  <SelectItem key={i + 1} value={String(i + 1)} className="font-bold text-xs uppercase tracking-widest">{m}</SelectItem>
+                  <SelectItem key={i + 1} value={String(i + 1)} className="font-medium text-sm">{m}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
 
-            <Select value={String(year)} onValueChange={(val) => setYear(parseInt(val))}>
-              <SelectTrigger className="h-12 rounded-xl bg-white border-none shadow-sm font-black text-xs uppercase tracking-widest min-w-[100px]">
+            <Select value={String(year)} onValueChange={(val) => { if (val) setYear(parseInt(val)); }}>
+              <SelectTrigger className="h-10 rounded-xl bg-white border-slate-200 shadow-sm font-semibold text-sm min-w-[100px]">
                 <SelectValue placeholder="Year" />
               </SelectTrigger>
-              <SelectContent className="rounded-xl border-none shadow-2xl">
+              <SelectContent className="rounded-xl border-slate-100 shadow-xl">
                 {[2024, 2025, 2026].map(y => (
-                  <SelectItem key={y} value={String(y)} className="font-bold text-xs uppercase tracking-widest">{y}</SelectItem>
+                  <SelectItem key={y} value={String(y)} className="font-medium text-sm">{y}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
 
           <Button 
-            className="h-12 px-8 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black uppercase tracking-widest text-[10px] shadow-2xl transition-all hover:scale-[1.02] active:scale-[0.98] shrink-0"
+            className="h-10 px-6 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs shadow-md transition-all shrink-0"
             onClick={handleSave}
             disabled={saving || Object.keys(pendingChanges).length === 0}
           >
@@ -248,193 +260,180 @@ export default function DailyEntryGrid() {
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-6 px-4 h-full overflow-hidden pb-4">
-        {/* Left Side: Calendar Dashboard */}
-        <div className="w-full lg:w-[500px] flex flex-col gap-4">
-          <div className="bg-white/40 backdrop-blur-xl p-6 rounded-[2.5rem] premium-shadow border border-white/60">
-            <div className="grid grid-cols-7 gap-2">
-              {['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'].map(day => (
-                <div key={day} className="text-center text-[10px] font-black text-slate-400 py-2 tracking-widest">
-                  {day}
-                </div>
-              ))}
-              
-              {calendarDays.map((day, idx) => (
-                <div key={idx} className="aspect-square">
-                  {day ? (
-                    <button
-                      onClick={() => setSelectedDate(day)}
-                      className={cn(
-                        "w-full h-full rounded-2xl p-2 flex flex-col items-center justify-between transition-all relative group overflow-hidden border-2",
-                        selectedDate === day 
-                          ? "bg-slate-900 border-slate-900 shadow-xl shadow-slate-200" 
-                          : "bg-white/80 border-transparent hover:border-emerald-500/30 hover:bg-white"
-                      )}
-                    >
-                      <span className={cn(
-                        "text-xs font-black self-start",
-                        selectedDate === day ? "text-white" : "text-slate-400"
-                      )}>
-                        {String(day).padStart(2, '0')}
-                      </span>
-                      
-                      <div className="flex flex-col items-center">
-                        <span className={cn(
-                          "text-[10px] font-black leading-none",
-                          selectedDate === day ? "text-emerald-400" : "text-emerald-600"
-                        )}>
-                          {dailySummaries[day]?.worked || 0}
-                        </span>
-                        <span className={cn(
-                          "text-[6px] font-black uppercase tracking-tighter mt-0.5",
-                          selectedDate === day ? "text-slate-400" : "text-slate-300"
-                        )}>
-                          Worked
-                        </span>
-                      </div>
+      <div className="flex flex-col gap-6 px-4">
+        {/* Rows: Calendar, then Date Info */}
+        <div className="flex flex-col gap-6 shrink-0">
+          <div className="bg-white/60 backdrop-blur-md p-5 rounded-3xl premium-shadow border border-white/60">
+            <div className="flex flex-row gap-1 justify-between w-full">
+              {daysArray.map((day) => {
+                const dayOfWeek = new Date(year, month - 1, day).toLocaleDateString('en-US', { weekday: 'narrow' }).toUpperCase();
+                return (
+                  <button
+                    key={day}
+                    onClick={() => setSelectedDate(day)}
+                    className={cn(
+                      "flex-1 min-w-0 py-1.5 px-0.5 rounded-lg flex flex-col items-center justify-center transition-all relative group border",
+                      selectedDate === day 
+                        ? "bg-slate-900 border-slate-900 shadow-sm transform scale-110 z-10" 
+                        : "bg-white/80 border-slate-100 hover:border-emerald-500/50 hover:bg-white"
+                    )}
+                  >
+                    <span className={cn(
+                      "text-[8px] font-bold mb-0.5",
+                      selectedDate === day ? "text-slate-300" : "text-slate-400"
+                    )}>
+                      {dayOfWeek}
+                    </span>
+                    <span className={cn(
+                      "text-xs font-bold",
+                      selectedDate === day ? "text-white" : "text-slate-800"
+                    )}>
+                      {day}
+                    </span>
 
-                      {/* Indicator dot */}
-                      {dailySummaries[day]?.notWorked > 0 && (
-                        <div className="absolute top-2 right-2 h-1 w-1 rounded-full bg-rose-500" />
-                      )}
-                    </button>
-                  ) : (
-                    <div className="w-full h-full opacity-20" />
-                  )}
-                </div>
-              ))}
+                    {/* Indicator dot */}
+                    {dailySummaries[day]?.notWorked > 0 && (
+                      <div className="absolute top-1 right-1 h-1 w-1 rounded-full bg-rose-500" />
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
           {/* Quick Stats for selected day */}
-          <div className="bg-slate-900 rounded-[2rem] p-6 text-white shadow-2xl relative overflow-hidden group">
-            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/20 to-transparent opacity-50" />
-            <div className="relative z-10">
-               <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400 mb-1">Detailed View</p>
-                    <h3 className="text-xl font-black italic tracking-tighter uppercase">
-                      {new Date(year, month - 1, selectedDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
-                    </h3>
-                  </div>
-                  <div className="h-10 w-10 bg-white/10 rounded-xl flex items-center justify-center">
-                    <Calendar className="text-emerald-400" size={20} />
-                  </div>
-               </div>
-               <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-white/5 rounded-2xl p-4 border border-white/10">
-                    <span className="text-2xl font-black block">{dailySummaries[selectedDate]?.worked || 0}</span>
-                    <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Pilots Worked</span>
-                  </div>
-                  <div className="bg-white/5 rounded-2xl p-4 border border-white/10">
-                    <span className="text-2xl font-black block text-rose-400">{dailySummaries[selectedDate]?.notWorked || 0}</span>
-                    <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Absentees</span>
-                  </div>
-               </div>
+          <div className="grid grid-cols-4 gap-3">
+            <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex flex-row justify-center items-baseline gap-2">
+              <span className="text-2xl font-bold text-slate-900">{dailySummaries[selectedDate]?.worked || 0}</span>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Worked</span>
+            </div>
+            <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex flex-row justify-center items-baseline gap-2">
+              <span className="text-2xl font-bold text-rose-500">{dailySummaries[selectedDate]?.notWorked || 0}</span>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Absent</span>
+            </div>
+            <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex flex-row justify-center items-baseline gap-2">
+              <span className="text-2xl font-bold text-blue-500">{selectedDateStats.totalOrders}</span>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Orders</span>
+            </div>
+            <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex flex-row justify-center items-baseline gap-2">
+              <span className="text-2xl font-bold text-amber-500">{selectedDateStats.totalCash.toFixed(2)}</span>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Cash</span>
             </div>
           </div>
         </div>
 
-        {/* Right Side: Interactive Rider List for Selected Day */}
-        <div className="flex-1 flex flex-col bg-white rounded-[2.5rem] shadow-2xl border border-slate-100 overflow-hidden min-h-0">
-          <div className="p-6 border-b border-slate-100 flex flex-col gap-4 bg-slate-50/50">
+        {/* Bottom Row: Interactive Rider List for Selected Day */}
+        <div className="flex flex-col bg-white rounded-3xl shadow-lg border border-slate-200 overflow-hidden">
+          <div className="p-5 border-b border-slate-100 flex flex-col gap-4 bg-slate-50/50">
             <div className="flex justify-between items-center">
               <div>
-                <h3 className="text-xl font-black italic tracking-tighter uppercase text-slate-900">
+                <h3 className="text-lg font-bold text-slate-900">
                   {new Date(year, month - 1, selectedDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                 </h3>
-                <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest mt-0.5">
+                <p className="text-xs font-medium text-emerald-600 mt-0.5">
                   Managing Attendance & Performance
                 </p>
               </div>
-              <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-xl border border-slate-200 shadow-sm">
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 rounded-lg border border-emerald-100">
                 <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-600">Active Session</span>
+                <span className="text-xs font-semibold text-emerald-700">Active</span>
               </div>
             </div>
 
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <Tabs value={companyCode} onValueChange={setCompanyCode} className="w-full md:w-auto">
-                <TabsList className="bg-white p-1 rounded-xl h-auto border border-slate-200 flex flex-wrap gap-1">
-                  <TabsTrigger value="ALL" className="rounded-lg px-4 py-2 font-black text-[9px] uppercase tracking-widest data-[state=active]:bg-slate-900 data-[state=active]:text-white transition-all">ALL</TabsTrigger>
+                <TabsList className="bg-slate-100 p-1 rounded-xl h-auto flex flex-wrap gap-1">
+                  <TabsTrigger value="ALL" className="rounded-lg px-4 py-1.5 font-semibold text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-slate-900 text-slate-500 transition-all">ALL</TabsTrigger>
                   {companies.map(c => (
-                    <TabsTrigger key={c} value={c} className="rounded-lg px-4 py-2 font-black text-[9px] uppercase tracking-widest data-[state=active]:bg-emerald-500 data-[state=active]:text-white transition-all">{c}</TabsTrigger>
+                    <TabsTrigger key={c} value={c} className="rounded-lg px-4 py-1.5 font-semibold text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-slate-900 text-slate-500 transition-all">{c}</TabsTrigger>
                   ))}
                 </TabsList>
               </Tabs>
 
-              <div className="relative w-full md:w-64">
+              <div className="relative w-full md:w-72">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                 <Input 
-                  placeholder="Search Pilot..." 
+                  placeholder="Search pilots..." 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="h-10 pl-10 rounded-xl bg-white border-slate-200 font-bold text-xs uppercase tracking-widest"
+                  className="h-9 pl-9 rounded-xl bg-white border-slate-200 text-sm"
                 />
               </div>
             </div>
           </div>
 
-          <div className="flex-1 overflow-auto p-4">
-            <div className="grid grid-cols-1 2xl:grid-cols-2 gap-3">
-              {filteredRiders.map((rider) => (
-                <div key={rider.id} className="bg-slate-50 hover:bg-white hover:shadow-xl hover:shadow-slate-100 border border-transparent hover:border-slate-100 transition-all p-4 rounded-3xl group">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 bg-white rounded-2xl flex items-center justify-center font-black text-slate-400 text-xs shadow-sm group-hover:bg-slate-900 group-hover:text-white transition-colors">
-                        {rider.riderId.slice(-2)}
+          <div className="p-5 bg-slate-50/30">
+            <div className="grid grid-cols-2 gap-4">
+              {filteredRiders.map((rider) => {
+                const status = getEntryValue(rider.id, selectedDate, 'status');
+                const isWorking = status === 'working';
+                return (
+                  <div key={rider.id} className="bg-white border border-slate-200 p-4 rounded-2xl shadow-sm hover:shadow-md transition-all flex flex-col gap-4">
+                    <div className="flex justify-between items-start gap-4">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="h-10 w-10 bg-slate-100 rounded-xl flex items-center justify-center font-bold text-slate-500 text-sm shrink-0">
+                          {rider.riderId.slice(-2)}
+                        </div>
+                        <div className="min-w-0">
+                          <h4 className="font-semibold text-sm text-slate-900 truncate">{rider.riderName}</h4>
+                          <p className="text-xs font-medium text-slate-500 truncate">{rider.riderId}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="shrink-0 flex bg-slate-100 p-1 rounded-lg">
+                        <button
+                          onClick={() => handleCellChange(rider.id, selectedDate, 'status', 'working')}
+                          className={cn(
+                            "px-3 py-1 rounded-md text-xs font-semibold transition-all",
+                            isWorking ? "bg-emerald-500 text-white shadow-sm" : "text-slate-500 hover:bg-slate-200"
+                          )}
+                        >
+                          Work
+                        </button>
+                        <button
+                          onClick={() => handleCellChange(rider.id, selectedDate, 'status', 'absent')}
+                          className={cn(
+                            "px-3 py-1 rounded-md text-xs font-semibold transition-all",
+                            !isWorking ? "bg-rose-500 text-white shadow-sm" : "text-slate-500 hover:bg-slate-200"
+                          )}
+                        >
+                          Absent
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                      <div>
+                        <Label className="text-[10px] font-semibold text-slate-500 uppercase mb-1.5 block">Orders</Label>
+                        <Input 
+                          type="number"
+                          value={getEntryValue(rider.id, selectedDate, 'orders') || ''}
+                          onChange={(e) => handleCellChange(rider.id, selectedDate, 'orders', parseInt(e.target.value) || 0)}
+                          className="h-8 bg-white border-slate-200 font-medium text-sm"
+                          placeholder="0"
+                        />
                       </div>
                       <div>
-                        <h4 className="font-black text-xs uppercase tracking-tight text-slate-900">{rider.riderName}</h4>
-                        <p className="text-[9px] font-bold text-slate-400 tracking-tighter uppercase">{rider.riderId}</p>
+                        <Label className="text-[10px] font-semibold text-slate-500 uppercase mb-1.5 block">Cash Collected</Label>
+                        <Input 
+                          type="number"
+                          step="0.01"
+                          value={getEntryValue(rider.id, selectedDate, 'cashCollected') || ''}
+                          onChange={(e) => handleCellChange(rider.id, selectedDate, 'cashCollected', parseFloat(e.target.value) || 0)}
+                          className="h-8 bg-white border-slate-200 font-medium text-sm"
+                          placeholder="0.00"
+                        />
                       </div>
                     </div>
-                    <select 
-                      value={getEntryValue(rider.id, selectedDate, 'status')}
-                      onChange={(e) => handleCellChange(rider.id, selectedDate, 'status', e.target.value)}
-                      className={cn(
-                        "text-[9px] font-black uppercase px-3 py-1.5 rounded-lg outline-none cursor-pointer transition-all",
-                        getEntryValue(rider.id, selectedDate, 'status') === 'working' 
-                          ? "bg-emerald-100 text-emerald-600 hover:bg-emerald-500 hover:text-white" 
-                          : "bg-rose-100 text-rose-600 hover:bg-rose-500 hover:text-white"
-                      )}
-                    >
-                      <option value="working">Working</option>
-                      <option value="not_working">Not Working</option>
-                      <option value="absent">Absent</option>
-                      <option value="holiday">Holiday</option>
-                    </select>
                   </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-white rounded-2xl p-3 border border-slate-100 group-hover:border-slate-200 transition-colors">
-                      <Label className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Orders</Label>
-                      <input 
-                        type="number"
-                        value={getEntryValue(rider.id, selectedDate, 'orders')}
-                        onChange={(e) => handleCellChange(rider.id, selectedDate, 'orders', parseInt(e.target.value) || 0)}
-                        className="w-full bg-transparent font-black text-xs text-slate-900 outline-none tabular-nums"
-                      />
-                    </div>
-                    <div className="bg-white rounded-2xl p-3 border border-slate-100 group-hover:border-slate-200 transition-colors">
-                      <Label className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Cash Collected</Label>
-                      <input 
-                        type="number"
-                        step="0.01"
-                        value={getEntryValue(rider.id, selectedDate, 'cashCollected')}
-                        onChange={(e) => handleCellChange(rider.id, selectedDate, 'cashCollected', parseFloat(e.target.value) || 0)}
-                        className="w-full bg-transparent font-black text-xs text-slate-900 outline-none tabular-nums"
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {filteredRiders.length === 0 && !loading && (
-              <div className="flex flex-col items-center justify-center h-full py-20 opacity-40">
-                <Search size={48} className="text-slate-300 mb-4" />
-                <p className="text-xs font-black uppercase tracking-widest">No Pilots Found</p>
+              <div className="flex flex-col items-center justify-center h-full py-20 opacity-60">
+                <Search size={32} className="text-slate-400 mb-3" />
+                <p className="text-sm font-medium text-slate-500">No Pilots Found</p>
               </div>
             )}
           </div>
